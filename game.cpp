@@ -4,14 +4,16 @@ using namespace std;
 class Ghost
 {
  public:
-	int id;
+	int Q;
 	double i;
 	double j;
+	char* road;
 
-	Ghost(int ghid, double ghi, double ghj){
-		id = ghid;
+	Ghost(int ghq, double ghi, double ghj){
+		Q = ghq;
 		i = ghi;
 		j = ghj;
+		road="";
 	}
 
 	Ghost(){};
@@ -37,10 +39,13 @@ double pm = 0;
 int pmi = 23;
 int pmj = 14;
 char pml = ' ';
-char lastpml = ' ';
+char lastpml = 'l';
+int pmQ=1;
 int pmrot = 0;
 int pmSwpAng = 240;
 int pmStrAng = 60;
+
+double bigFoodSize = 0.25;
 
 bool ride = false;
 
@@ -132,6 +137,7 @@ void otherWall(){
 }
 
 void wall(){
+
 	gluCylinder(gluNewQuadric(),.5,0,1,20,20);
 }
 
@@ -148,9 +154,9 @@ void ghost(int n){
 
 	glTranslatef(Ghosts[n].i,Ghosts[n].j,0);
 
+	glColor3f(1,1,0);
 	gluCylinder(gluNewQuadric(),0.5,0.35,0.5,20,20);
 	glTranslated(0.0,0,0.5);
-	glColor3f(1,1,0);
 	gluCylinder(gluNewQuadric(),0.35,0,0.5,20,20);
 
 	glColor3f(1,.5,0);
@@ -214,7 +220,22 @@ void drawFood(){
 			}
 			if(game[i][j] == 1){
 				glColor3f(0,1,0);
+
+				if(bigFoodSize >= 1.75)
+					bigFoodSize = 0.25;
+
+				if(bigFoodSize>1)
+					glScalef(2-bigFoodSize,2-bigFoodSize,2-bigFoodSize);
+				else
+					glScalef(bigFoodSize,bigFoodSize,bigFoodSize);
+
 				bigFood();
+
+				if(bigFoodSize>1)
+					glScalef(1/(2-bigFoodSize),1/(2-bigFoodSize),1/(2-bigFoodSize));
+				else
+					glScalef(1/bigFoodSize,1/bigFoodSize,1/bigFoodSize);
+				bigFoodSize += 0.02;
 			}
 		}
 		glPopMatrix();
@@ -362,8 +383,95 @@ void drawPacMan(){
 	glPopMatrix();
 }
 
+void nextMoveGhost(int nn){
+	if(pmi-Ghosts[nn].i==0) {
+		if(pmj-Ghosts[nn].j>0){ // go right *** OK
+			if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
+				Ghosts[nn].j+=.2;
+			}else{
+				if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1]!=-1){ // go left
+					Ghosts[nn].j-=.2;
+				}else{
+					if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
+						Ghosts[nn].i-=.2;
+					}else{ //go down
+						Ghosts[nn].i+=.2;
+					}
+				}
+			}
+		} else { // go left *** OK
+			if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1]!=-1){ // go left
+				Ghosts[nn].j-=.2;
+			}else{
+				if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
+					Ghosts[nn].j+=.2;
+				}else{
+					if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
+						Ghosts[nn].i-=.2;
+					}else{ //go down
+						Ghosts[nn].i+=.2;
+					}
+				}
+			}
+		}
+	}else{
+		if(pmi-Ghosts[nn].i>0){ // go down ***
+			if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j]!=-1){ // go down
+				Ghosts[nn].i+=.2;
+			}else{
+				if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
+					Ghosts[nn].i-=.2;
+				}else{
+					if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
+						Ghosts[nn].j+=.2;
+					}else{ //go left
+						Ghosts[nn].j-=.2;
+					}
+				}
+			}
+		}else{ // go up ***
+			if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j+1]!=-1){ // go up
+				Ghosts[nn].i-=.2;
+			}else{
+				if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j+1]!=-1){ // go down
+					Ghosts[nn].i+=.2;
+				}else{
+					if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+2]!=-1){ // go right
+						Ghosts[nn].j+=.2;
+					}else{ //go left
+						Ghosts[nn].j-=.2;
+					}
+				}
+			}
+		}
+	}
+}
+
+void nextMoveGhost2(int nn){
+	if(nn==0) {
+		
+	} else {
+		if (nn==1) {
+		
+		} else {
+			if (nn==2) {
+			
+			} else {
+			
+			}
+		}
+	}
+}
+
+bool donotChangeDir(int nn){
+	return true;
+}
+
 void drawGhosts(){	
 	for(int i=0;i<4;i++) {
+		//if(donotChangeDir(i)){
+			nextMoveGhost(i);
+		//}
 		ghost(i);
 	}	
 }
@@ -406,12 +514,15 @@ void Display(){
 
 	gluLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, 0, 0, 1);
 
-	GLfloat LightAmbient[] = { 1, 0.0, 0.0, 1.0 };    
-	GLfloat LightDiffuse[] = { 0.1, 0.1, 0.9, 1.0 };  
-	GLfloat LightPosition[] = { pmi, pmj+1, zz, 1.0 };
+	GLfloat LightAmbient[] = { 1, 0.0, 0.0, 0 };    
+	GLfloat LightDiffuse[] = { 0.1, 0.1, 0.9, 0 };  
+	GLfloat LightPosition[] = { pmi, pmj+1, -2, 1 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);   
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);   
 	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition); 
+	glLightf (GL_LIGHT0, GL_SPOT_CUTOFF, 75.f);
+	GLfloat spot_direction[] = { .0, .0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
 
 	GLfloat LightAmbient7[] = { 0, 01, 0.0, 1.0 }; 
 	GLfloat LightDiffuse7[] = { 0.1, 0.1, .5, 1.0 };
@@ -420,7 +531,7 @@ void Display(){
 	glLightfv(GL_LIGHT7, GL_DIFFUSE, LightDiffuse7);   
 	glLightfv(GL_LIGHT7, GL_POSITION,LightPosition7);  
 
-	
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .05);
 
 	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);	
 
@@ -436,7 +547,7 @@ void Display(){
 		glDisable(GL_LIGHT7);
 
 		glDisable(GL_LIGHTING);
-
+		//drawGhosts();
 		drawFood();		
 		drawPacMan();
 	}
@@ -512,6 +623,10 @@ void main(int argc,char** argr)
 	
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glutCreateWindow("PacMan");
 	glutFullScreen();
