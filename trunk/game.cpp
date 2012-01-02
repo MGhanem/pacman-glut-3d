@@ -7,13 +7,12 @@ class Ghost
 	int Q;
 	double i;
 	double j;
-	char* road;
+	char go;
 
 	Ghost(int ghq, double ghi, double ghj){
 		Q = ghq;
 		i = ghi;
 		j = ghj;
-		road="";
 	}
 
 	Ghost(){};
@@ -137,7 +136,6 @@ void otherWall(){
 }
 
 void wall(){
-
 	gluCylinder(gluNewQuadric(),.5,0,1,20,20);
 }
 
@@ -383,7 +381,7 @@ void drawPacMan(){
 	glPopMatrix();
 }
 
-void nextMoveGhost(int nn){
+void nextMoveGhost2(int nn){
 	if(pmi-Ghosts[nn].i==0) {
 		if(pmj-Ghosts[nn].j>0){ // go right *** OK
 			if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
@@ -447,31 +445,59 @@ void nextMoveGhost(int nn){
 	}
 }
 
-void nextMoveGhost2(int nn){
-	if(nn==0) {
-		
-	} else {
-		if (nn==1) {
-		
-		} else {
-			if (nn==2) {
-			
-			} else {
-			
-			}
-		}
+void nextMoveGhost(int nn){
+	if(Ghosts[nn].j < 2 ){
+		Ghosts[nn].j = 27;
+		return;
 	}
-}
 
-bool donotChangeDir(int nn){
-	return true;
+	if(Ghosts[nn].j == 26 ){
+		Ghosts[nn].j = 0;
+		return;
+	}
+
+	srand (time(NULL));
+	string str = "";
+	int c = 0;
+
+	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1] != -1 && Ghosts[nn].go!='r'){
+		c++;
+		str += "l";
+	}
+	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1] != -1 && Ghosts[nn].go!='l'){
+		c++;
+		str += "r";
+	}
+	if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='d'){
+		c++;
+		str += "u";
+	}
+	if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='u'){
+		c++;
+		str += "d";
+	}
+
+	c = rand() % c;
+
+	Ghosts[nn].go = str.at(c);
+
+	if(Ghosts[nn].go == 'l'){
+		Ghosts[nn].j -= .2;
+	}
+	if(Ghosts[nn].go == 'r'){
+		Ghosts[nn].j += .2;
+	}
+	if(Ghosts[nn].go == 'u'){
+		Ghosts[nn].i -= .2;
+	}
+	if(Ghosts[nn].go == 'd'){
+		Ghosts[nn].i += .2;
+	}
 }
 
 void drawGhosts(){	
 	for(int i=0;i<4;i++) {
-		//if(donotChangeDir(i)){
-			nextMoveGhost(i);
-		//}
+		nextMoveGhost(i);
 		ghost(i);
 	}	
 }
@@ -499,6 +525,34 @@ void timerFunction(int arg)
 {
 	//time = glutGet(GLUT_ELAPSED_TIME);
 	glutPostRedisplay();
+}
+
+void drawBG(){
+	glPushMatrix();
+
+	static GLuint eboxTexture = LoadTexture("bg.ppm", 400, 320, false);
+	GLUquadricObj* esphere = gluNewQuadric();  
+	gluQuadricTexture(esphere, true);
+	gluQuadricNormals(esphere, GLU_SMOOTH);
+	glEnable(GL_TEXTURE_2D);  
+	glBindTexture(GL_TEXTURE_2D, eboxTexture);
+	glEnable(GL_CULL_FACE);
+	
+	glBegin(GL_QUADS);                           // draw square
+      glTexCoord2f(0.0,0.0);	glVertex3f(-50.0f,50.0f, 5.0f);
+      glTexCoord2f(1.0,0.0);	glVertex3f( -50.0f, -50.0f, 5.0f);
+      glTexCoord2f(1.0,1.0);	glVertex3f( 50.0f, -50.0f, 5.0f);
+      glTexCoord2f(0.0,1.0);	glVertex3f( 50.0f, 50.0f, 5.0f);
+   glEnd();
+
+	gluDeleteQuadric(esphere);
+
+	glDisable(GL_TEXTURE_2D); 
+	glEnable(GL_CULL_FACE);
+
+	glPopMatrix();
+
+
 }
 
 void Display(){
@@ -533,13 +587,17 @@ void Display(){
 
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .05);
 
+	
 	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);	
+
+	drawBG();
+	
 
 	if(n!=0){
 		glEnable(GL_LIGHTING);
 
 		glEnable(GL_LIGHT0);
-		drawWalls();
+		drawWalls();		
 		glDisable(GL_LIGHT0);
 
 		glEnable(GL_LIGHT7);
@@ -547,7 +605,8 @@ void Display(){
 		glDisable(GL_LIGHT7);
 
 		glDisable(GL_LIGHTING);
-		//drawGhosts();
+
+		drawGhosts();
 		drawFood();		
 		drawPacMan();
 	}
