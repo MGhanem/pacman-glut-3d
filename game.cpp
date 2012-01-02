@@ -568,6 +568,18 @@ void displayScore(){
     }
 }
 
+void displayExit(){
+	glColor3f(1,1,1);
+	std::string u = "Exit";
+
+	int len = u.size();
+	glRasterPos2f( 10,-7);
+	for (int i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, u.at(i));
+    }
+
+}
+
 void displayLifes(){
 	glPushMatrix();
 	glTranslatef(31,-7,0);
@@ -603,21 +615,19 @@ void drawDDPacMan(){
 void keyb(unsigned char c, int a, int b){		
 	switch (c) {
 		case 27 : exit(0); break;
-		case 'a' : eyeX++; break;
-		case 's' : eyeY++; break;
-		case 'd' : eyeZ++; break;
-		case 'f' : eyeX--; break;
-		case 'g' : eyeY--; break;
-		case 'h' : eyeZ--; break;
-		case 'z' : atX++; break;
-		case 'x' : atY++; break;
-		case 'c' : atZ++; break;
-		case 'v' : atX--; break;
-		case 'b' : atY--; break;
-		case 'n' : atZ--; break;
-		case 'q' : angle++; break;
-		case 'w' : angle--; break;
-		case 'r' : ride = (ride==false); break;
+
+		case 'x' : atX++; break;
+		case 'X' : atX--; break;
+
+		case 'y' : atY++; break;
+		case 'Y' : atY--; break;
+
+		case 'z' : atZ++; break;
+		case 'Z' : atZ--; break;
+
+		case '+' : eyeZ--; atZ--; break;
+		case '-' : eyeZ++; atZ++;break;
+
 	}
 	
 }
@@ -654,6 +664,16 @@ void processSpecialKeys(int key, int x, int y){
 		}
 	}
 	
+}
+
+void mouse(int but, int str, int x, int y){
+	if(but == GLUT_LEFT_BUTTON && str == GLUT_UP){
+		cout << x << " " << y << endl;
+		if(x>=163&&x<193&&y>=287&&y<301){
+			exit(0);
+		}
+	}
+
 }
 
 void read(){
@@ -827,6 +847,8 @@ void Display(){
 
 	displayScore();
 
+	displayExit();
+
 	glFlush();
 
 	glutTimerFunc(25,timerFunction,0);
@@ -853,6 +875,7 @@ void main(int argc,char** argr)
 	
 	glutKeyboardFunc(keyb);
 	glutSpecialFunc( processSpecialKeys );
+	glutMouseFunc(mouse);
 
 	glClearColor(.0f,.0f,.0f,.0f);	
 	glutDisplayFunc(Display);
