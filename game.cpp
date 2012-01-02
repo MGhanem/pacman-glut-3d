@@ -199,7 +199,7 @@ void drawFood(){
 }
 
 void newLife(){
-	if(pmLife < 1){
+	if(pmLife < 1 && !gameOver){
 		stringstream s;
 		s <<"GAME OVER \n You Final score is ";
 		s << score;
@@ -216,14 +216,16 @@ void newLife(){
 
 void drawPacMan(){	
 	for(int i=0;i<4;i++){
-		if(abs((Ghosts[i].i)-pmi)<=.3 && abs((Ghosts[i].j-1)-pmj)<=.3){
+		if(abs((Ghosts[i].i)-pmi)<=.5 && abs((Ghosts[i].j-1)-pmj)<=.5){
 			if(pmEating){
 				Ghosts[i].life = false;
 				Ghosts[i].i = 13;
 				Ghosts[i].j = 14;
 				score+=200;
+				PlaySound(L"pacman_eatghost", 0, SND_ASYNC);
 			} else {
 				pmLive = false;
+				PlaySound(L"pacman_death", 0, SND_ASYNC);
 				newLife();
 			}
 		}
@@ -261,6 +263,7 @@ void drawPacMan(){
 							}
 							score+=10;
 							n--;
+							PlaySound(L"pacman_eatfruit", 0, SND_ASYNC);
 						} else { 
 							pmStrAng = 60;
 							pmSwpAng = 240;
@@ -302,6 +305,7 @@ void drawPacMan(){
 							}
 							score+=10;
 							n--;
+							PlaySound(L"pacman_eatfruit", 0, SND_ASYNC);
 						} else { 
 							pmStrAng = 60;
 							pmSwpAng = 240;
@@ -342,6 +346,7 @@ void drawPacMan(){
 						}
 						score+=10;
 						n--;
+						PlaySound(L"pacman_eatfruit", 0, SND_ASYNC);
 					} else { 
 						pmStrAng = 60;
 						pmSwpAng = 240;
@@ -377,6 +382,7 @@ void drawPacMan(){
 						}
 						score+=10;
 						n--;
+						PlaySound(L"pacman_eatfruit", 0, SND_ASYNC);
 					} else { 
 						pmStrAng = 60;
 						pmSwpAng = 240;
@@ -668,7 +674,6 @@ void processSpecialKeys(int key, int x, int y){
 
 void mouse(int but, int str, int x, int y){
 	if(but == GLUT_LEFT_BUTTON && str == GLUT_UP){
-		cout << x << " " << y << endl;
 		if(x>=163&&x<193&&y>=287&&y<301){
 			exit(0);
 		}
