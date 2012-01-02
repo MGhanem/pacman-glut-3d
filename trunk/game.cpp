@@ -381,78 +381,30 @@ void drawPacMan(){
 	glPopMatrix();
 }
 
-void nextMoveGhost2(int nn){
-	if(pmi-Ghosts[nn].i==0) {
-		if(pmj-Ghosts[nn].j>0){ // go right *** OK
-			if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
-				Ghosts[nn].j+=.2;
-			}else{
-				if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1]!=-1){ // go left
-					Ghosts[nn].j-=.2;
-				}else{
-					if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
-						Ghosts[nn].i-=.2;
-					}else{ //go down
-						Ghosts[nn].i+=.2;
-					}
-				}
-			}
-		} else { // go left *** OK
-			if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1]!=-1){ // go left
-				Ghosts[nn].j-=.2;
-			}else{
-				if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
-					Ghosts[nn].j+=.2;
-				}else{
-					if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
-						Ghosts[nn].i-=.2;
-					}else{ //go down
-						Ghosts[nn].i+=.2;
-					}
-				}
-			}
-		}
-	}else{
-		if(pmi-Ghosts[nn].i>0){ // go down ***
-			if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j]!=-1){ // go down
-				Ghosts[nn].i+=.2;
-			}else{
-				if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j]!=-1){ // go up
-					Ghosts[nn].i-=.2;
-				}else{
-					if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1]!=-1){ // go right
-						Ghosts[nn].j+=.2;
-					}else{ //go left
-						Ghosts[nn].j-=.2;
-					}
-				}
-			}
-		}else{ // go up ***
-			if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j+1]!=-1){ // go up
-				Ghosts[nn].i-=.2;
-			}else{
-				if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j+1]!=-1){ // go down
-					Ghosts[nn].i+=.2;
-				}else{
-					if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+2]!=-1){ // go right
-						Ghosts[nn].j+=.2;
-					}else{ //go left
-						Ghosts[nn].j-=.2;
-					}
-				}
-			}
-		}
-	}
-}
-
 void nextMoveGhost(int nn){
-	if(Ghosts[nn].j < 2 ){
-		Ghosts[nn].j = 27;
+	if(Ghosts[nn].j < 1.2 ){
+		Ghosts[nn].j = 27.5;
 		return;
 	}
 
-	if(Ghosts[nn].j == 26 ){
-		Ghosts[nn].j = 0;
+	if(Ghosts[nn].j > 27.8 ){
+		Ghosts[nn].j = 1.5;
+		return;
+	}
+
+	if(int(Ghosts[nn].i*10)%10!=0||int(Ghosts[nn].j*10)%10!=0){
+		if(Ghosts[nn].go == 'l'){
+			Ghosts[nn].j -= .1;
+		}
+		if(Ghosts[nn].go == 'r'){
+			Ghosts[nn].j += .1;
+		}
+		if(Ghosts[nn].go == 'u'){
+			Ghosts[nn].i -= .1;
+		}
+		if(Ghosts[nn].go == 'd'){
+			Ghosts[nn].i += .1;
+		}
 		return;
 	}
 
@@ -460,38 +412,37 @@ void nextMoveGhost(int nn){
 	string str = "";
 	int c = 0;
 
-	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='r'){
+	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-2] != -1 && Ghosts[nn].go!='r'){
 		c++;
 		str += "l";
 	}
-	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j+1] != -1 && Ghosts[nn].go!='l'){
+	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='l'){
 		c++;
 		str += "r";
 	}
-	if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='d'){
+	if(game[(int)Ghosts[nn].i-1][(int)Ghosts[nn].j-1] != -1 && Ghosts[nn].go!='d'){
 		c++;
 		str += "u";
 	}
-	if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='u'){
+	if(game[(int)Ghosts[nn].i+1][(int)Ghosts[nn].j-1] != -1 && Ghosts[nn].go!='u'){
 		c++;
 		str += "d";
 	}
-	if(c==0){
 	c = rand() % c;
 
-	Ghosts[nn].go = str.at(c);}
+	Ghosts[nn].go = str.at(c);
 
 	if(Ghosts[nn].go == 'l'){
-		Ghosts[nn].j -= .02;
+		Ghosts[nn].j -= .1;
 	}
 	if(Ghosts[nn].go == 'r'){
-		Ghosts[nn].j += .02;
+		Ghosts[nn].j += .1;
 	}
 	if(Ghosts[nn].go == 'u'){
-		Ghosts[nn].i -= .02;
+		Ghosts[nn].i -= .1;
 	}
 	if(Ghosts[nn].go == 'd'){
-		Ghosts[nn].i += .02;
+		Ghosts[nn].i += .1;
 	}
 }
 
