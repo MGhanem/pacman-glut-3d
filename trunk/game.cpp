@@ -460,7 +460,7 @@ void nextMoveGhost(int nn){
 	string str = "";
 	int c = 0;
 
-	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j-1] != -1 && Ghosts[nn].go!='r'){
+	if(game[(int)Ghosts[nn].i][(int)Ghosts[nn].j] != -1 && Ghosts[nn].go!='r'){
 		c++;
 		str += "l";
 	}
@@ -476,22 +476,22 @@ void nextMoveGhost(int nn){
 		c++;
 		str += "d";
 	}
-
+	if(c==0){
 	c = rand() % c;
 
-	Ghosts[nn].go = str.at(c);
+	Ghosts[nn].go = str.at(c);}
 
 	if(Ghosts[nn].go == 'l'){
-		Ghosts[nn].j -= .2;
+		Ghosts[nn].j -= .02;
 	}
 	if(Ghosts[nn].go == 'r'){
-		Ghosts[nn].j += .2;
+		Ghosts[nn].j += .02;
 	}
 	if(Ghosts[nn].go == 'u'){
-		Ghosts[nn].i -= .2;
+		Ghosts[nn].i -= .02;
 	}
 	if(Ghosts[nn].go == 'd'){
-		Ghosts[nn].i += .2;
+		Ghosts[nn].i += .02;
 	}
 }
 
@@ -530,6 +530,8 @@ void timerFunction(int arg)
 void drawBG(){
 	glPushMatrix();
 
+	glColor3f(1.0f,1.0f,1.0f);
+
 	static GLuint eboxTexture = LoadTexture("bg.ppm", 400, 320, false);
 	GLUquadricObj* esphere = gluNewQuadric();  
 	gluQuadricTexture(esphere, true);
@@ -539,16 +541,16 @@ void drawBG(){
 	glEnable(GL_CULL_FACE);
 	
 	glBegin(GL_QUADS);                           // draw square
-      glTexCoord2f(0.0,0.0);	glVertex3f(-50.0f,50.0f, 5.0f);
-      glTexCoord2f(1.0,0.0);	glVertex3f( -50.0f, -50.0f, 5.0f);
-      glTexCoord2f(1.0,1.0);	glVertex3f( 50.0f, -50.0f, 5.0f);
-      glTexCoord2f(0.0,1.0);	glVertex3f( 50.0f, 50.0f, 5.0f);
-   glEnd();
+      glTexCoord2f(0.0,0.0);	glVertex3f( 2.0f, 2.0f, 5.0f);
+      glTexCoord2f(1.0,0.0);	glVertex3f( 29.0f, 2.0f, 5.0f);
+      glTexCoord2f(1.0,1.0);	glVertex3f( 29.0f, 27.0f, 5.0f);
+      glTexCoord2f(0.0,1.0);	glVertex3f( 2.0f, 27.0f, 5.0f);
+    glEnd();
 
 	gluDeleteQuadric(esphere);
 
 	glDisable(GL_TEXTURE_2D); 
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 
 	glPopMatrix();
 
@@ -590,10 +592,11 @@ void Display(){
 	
 	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);	
 
-	drawBG();
-	
 
 	if(n!=0){
+
+		drawBG();
+
 		glEnable(GL_LIGHTING);
 
 		glEnable(GL_LIGHT0);
@@ -681,6 +684,7 @@ void main(int argc,char** argr)
 	glutInit(&argc,argr);
 	
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH);
+	 glClearDepth(1.0); 
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_NORMALIZE);
