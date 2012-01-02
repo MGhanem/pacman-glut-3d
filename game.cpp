@@ -41,12 +41,14 @@ int pmrot = 0;
 int pmSwpAng = 240;
 int pmStrAng = 60;
 bool pmLive = true;
+int pmLife = 3;
 
 double bigFoodSize = 0.25;
 
 bool ride = false;
 
 int game [31][28];
+int level = 1;
 
 int n = 0;
 
@@ -58,6 +60,8 @@ int score = 0 ;
 
 double ghostSpeed= 0.1;
 
+bool gameOver = false;
+
 void otherWall(){
 	glPushMatrix();
 	glRotatef(90,1,0,0);
@@ -66,6 +70,22 @@ void otherWall(){
 }
 
 void wall(){
+	/*static GLuint eboxTexture = LoadTexture("ie.ppm", 275, 183, false);
+	GLUquadricObj* esphere = gluNewQuadric();  
+	gluQuadricTexture(esphere, true);
+	gluQuadricNormals(esphere, GLU_SMOOTH);
+	glEnable(GL_TEXTURE_2D);  
+	glBindTexture(GL_TEXTURE_2D, eboxTexture);
+	glEnable(GL_CULL_FACE);
+	
+	gluCylinder(gluNewQuadric(),.5,0,1,20,20);
+
+	gluDeleteQuadric(esphere);
+
+	glDisable(GL_TEXTURE_2D); 
+	glDisable(GL_CULL_FACE);*/
+	
+	
 	gluCylinder(gluNewQuadric(),.5,0,1,20,20);
 }
 
@@ -178,6 +198,22 @@ void drawFood(){
 	}
 }
 
+void newLife(){
+	if(pmLife < 1){
+		stringstream s;
+		s <<"GAME OVER \n You Final score is ";
+		s << score;
+		string x = s.str();
+		MessageBoxA(NULL, x.c_str(), "Sorry!!", MB_OK);
+		gameOver = true;
+	}else {
+		pmLife--;
+		pmi = 23;
+		pmj = 14;
+		pmLive = true;
+	}
+}
+
 void drawPacMan(){	
 	for(int i=0;i<4;i++){
 		if(abs((Ghosts[i].i)-pmi)<=.3 && abs((Ghosts[i].j-1)-pmj)<=.3){
@@ -188,6 +224,7 @@ void drawPacMan(){
 				score+=200;
 			} else {
 				pmLive = false;
+				newLife();
 			}
 		}
 	}
@@ -405,9 +442,24 @@ void nextMoveGhost(int nn){
 		c++;
 		str += "d";
 	}
-	c = rand() % c;
-
-	Ghosts[nn].go = str.at(c);
+	
+	if(c!=0){
+		c = rand() % c;
+		Ghosts[nn].go = str.at(c);
+	}else{
+		if(Ghosts[nn].go == 'l'){
+			Ghosts[nn].go = 'r';
+		}
+		if(Ghosts[nn].go == 'r'){
+			Ghosts[nn].go = 'l';
+		}
+		if(Ghosts[nn].go == 'u'){
+			Ghosts[nn].go = 'd';
+		}
+		if(Ghosts[nn].go == 'd'){
+			Ghosts[nn].go = 'u';
+		}
+	}
 
 	if(Ghosts[nn].go == 'l'){
 		Ghosts[nn].j -= ghostSpeed;
@@ -470,7 +522,7 @@ void drawBG(){
 
 	glColor3f(1.0f,1.0f,1.0f);
 
-	static GLuint eboxTexture = LoadTexture("bg.ppm", 400, 320, false);
+	static GLuint eboxTexture = LoadTexture("green.ppm", 1280, 800, false);
 	GLUquadricObj* esphere = gluNewQuadric();  
 	gluQuadricTexture(esphere, true);
 	gluQuadricNormals(esphere, GLU_SMOOTH);
@@ -478,6 +530,9 @@ void drawBG(){
 	glBindTexture(GL_TEXTURE_2D, eboxTexture);
 	glEnable(GL_CULL_FACE);
 	
+	//glTranslatef(15.5,14,0);
+	//gluSphere(esphere,15,100,100);
+
 	glBegin(GL_QUADS);
       glTexCoord2f(0.0,0.0);	glVertex3f( 2.0f, 2.0f, 5.0f);
       glTexCoord2f(1.0,0.0);	glVertex3f( 32.0f, 2.0f, 5.0f);
@@ -513,69 +568,36 @@ void displayScore(){
     }
 }
 
-void Display(){
-	glMatrixMode(GL_PROJECTION); // ...
-	glLoadIdentity();
-	gluPerspective(angle,1.5,0,40);
-	glMatrixMode(GL_MODELVIEW); // ...
-	glLoadIdentity();
-	if(ride) 
-		ridepm();
-	else
-		lastpml = ' ';
-
-	gluLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, 0, 0, 1);
-
-	GLfloat LightAmbient[] = { 1, 0.0, 0.0, 0 };    
-	GLfloat LightDiffuse[] = { 0.1, 0.1, 0.9, 0 };  
-	GLfloat LightPosition[] = { pmi, pmj+1, -2, 1 };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);   
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);   
-	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition); 
-	glLightf (GL_LIGHT0, GL_SPOT_CUTOFF, 75.f);
-	GLfloat spot_direction[] = { .0, .0, 1.0 };
-	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
-
-	GLfloat LightAmbient7[] = { 0, 01, 0.0, 1.0 }; 
-	GLfloat LightDiffuse7[] = { 0.1, 0.1, .5, 1.0 };
-	GLfloat LightPosition7[] = { 1.5, 1.5, 1.5, 0.0 };
-	glLightfv(GL_LIGHT7, GL_AMBIENT, LightAmbient7);   
-	glLightfv(GL_LIGHT7, GL_DIFFUSE, LightDiffuse7);   
-	glLightfv(GL_LIGHT7, GL_POSITION,LightPosition7);  
-
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .05);
-
-	
-	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);	
-
-
-	if(n!=0){
-
-		drawBG();
-
-		glEnable(GL_LIGHTING);
-
-		glEnable(GL_LIGHT0);
-		drawWalls();		
-		glDisable(GL_LIGHT0);
-
-		glEnable(GL_LIGHT7);
-		drawGhosts();
-		glDisable(GL_LIGHT7);
-
-		glDisable(GL_LIGHTING);
-
-		drawGhosts();
-		drawFood();		
-		if(pmLive)
-			drawPacMan();
+void displayLifes(){
+	glPushMatrix();
+	glTranslatef(31,-7,0);
+	for(int i=0; i<pmLife ;i++){
+		glTranslatef(0,1,0);
+		glColor3f(1,0,0);
+		gluPartialDisk(gluNewQuadric(),0,.5,20,20,60,240);
+		glColor3f(1,1,1);
+		gluDisk(gluNewQuadric(),.05,.15,20,20);
+		glColor3f(0,0,0);
+		gluDisk(gluNewQuadric(),.0,.05,20,20);
 	}
+	glPopMatrix();
+}
 
-	displayScore();
-
-	glFlush();
-
-	glutTimerFunc(25,timerFunction,0);
+void drawDDPacMan(){
+	for(int j=240;j<360;j+=10){
+		for(int i=60;i<360;i+=10){
+			glColor3f(1,0,0);
+			gluPartialDisk(gluNewQuadric(),0,5,20,20,i,j);
+			glFlush();
+			glColor3f(1,1,1);
+			gluPartialDisk(gluNewQuadric(),0,5,20,20,i,j);
+			glFlush();
+			glColor3f(0,0,0);
+			gluPartialDisk(gluNewQuadric(),0,5,20,20,i,j);
+			glFlush();
+		}
+	}
+	newLife();
 }
 
 void keyb(unsigned char c, int a, int b){		
@@ -642,7 +664,18 @@ void read(){
 	// 1 --> big food
 	// 2 --> ghost
 	// 3 --> pacMan
-	ifstream traffic ("pacman.txt");
+	string fileName;
+	switch (level){
+	case 1 :
+		 fileName = "pacman1.txt";
+		 break;
+	case 2 :
+		 fileName = "pacman2.txt";
+		 break;
+	}
+	
+	
+	ifstream traffic (fileName);
 	if(traffic.is_open()){
 		cout << "START READING" << endl;
 		string str;
@@ -706,6 +739,97 @@ void read(){
 
 	cout << "n = " << n << endl;
 
+}
+
+void displaySL(){
+	if(level>2){
+		stringstream s;
+		s <<"Thank you for playing Pac-Man 3D \n you finish with score :: ";
+		s << score;
+		string x = s.str();
+		MessageBoxA(NULL, x.c_str(), "Congratulations!", MB_OK);
+		return;
+	}
+	level++;
+	stringstream s;
+	s <<"Going to Next Level";
+	s << level;
+	string x = s.str();
+	MessageBoxA(NULL, x.c_str(), "Congratulations!", MB_OK);	
+	read();
+}
+
+void Display(){
+	glMatrixMode(GL_PROJECTION); // ...
+	glLoadIdentity();
+	gluPerspective(angle,1.5,0,40);
+	glMatrixMode(GL_MODELVIEW); // ...
+	glLoadIdentity();
+	if(ride) 
+		ridepm();
+	else
+		lastpml = ' ';
+
+	gluLookAt(eyeX, eyeY, eyeZ, atX, atY, atZ, 0, 0, 1);
+
+	GLfloat LightAmbient[] = { 1.0, .0, .0, 0 };    
+	GLfloat LightDiffuse[] = { 1, 0.1, 0.1, 0 };  
+	GLfloat LightPosition[] = { pmi, pmj+1, -2, 1 };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);   
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);   
+	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition); 
+	glLightf (GL_LIGHT0, GL_SPOT_CUTOFF, 75.f);
+	GLfloat spot_direction[] = { .0, .0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction);
+
+	GLfloat LightAmbient7[] = { 0, 01, 0.0, 1.0 }; 
+	GLfloat LightDiffuse7[] = { 0.1, 0.1, .5, 1.0 };
+	GLfloat LightPosition7[] = { 1.5, 1.5, 1.5, 0.0 };
+	glLightfv(GL_LIGHT7, GL_AMBIENT, LightAmbient7);   
+	glLightfv(GL_LIGHT7, GL_DIFFUSE, LightDiffuse7);   
+	glLightfv(GL_LIGHT7, GL_POSITION,LightPosition7);  
+
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, .05);
+
+	
+	glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);	
+
+	
+	if(n!=0){
+
+		drawBG();
+
+		glEnable(GL_LIGHTING);
+
+		glEnable(GL_LIGHT0);
+		drawWalls();		
+		glDisable(GL_LIGHT0);
+
+		glEnable(GL_LIGHT7);
+		drawGhosts();
+		glDisable(GL_LIGHT7);
+
+		glDisable(GL_LIGHTING);
+
+		drawGhosts();
+		drawFood();		
+		if(!gameOver)
+			if(pmLive)
+				drawPacMan();
+			else
+				drawDDPacMan();
+
+	}else{
+		displaySL();
+	}
+
+	displayLifes();
+
+	displayScore();
+
+	glFlush();
+
+	glutTimerFunc(25,timerFunction,0);
 }
 
 void main(int argc,char** argr)
